@@ -112,8 +112,10 @@ class _decoder:
         y = self.xorUnsigned(y, self.numberSet1[0])
         self.first = y
         self.second = x
-def fetchHTML(query):
+def searchHTML(query, fileType=""):
     queryPayload = {"q": query}
+    if fileType in ("documents", "videos", "images", "archives", "audios"):
+        queryPayload["type"] = fileType
     req = requests.get("https://uloz.to/hledej", params=queryPayload, headers={"X-Requested-With": "XMLHttpRequest"})
     res = json.loads(req.json()["items"].split("pg.push(")[1].split(");\n</script>")[0])
     decoder = _decoder(res[1])
@@ -122,8 +124,8 @@ def fetchHTML(query):
         result.append(decoder.decode(res[0][key]))
     return result
 
-def fetch(query):
-    html = "".join(fetchHTML(query))
+def search(query, fileType=""):
+    html = "".join(searchHTML(query, fileType))
     soup = BeautifulSoup(html, "html.parser")
     results = []
     for result in soup.select(".js-result-item"):
@@ -133,4 +135,8 @@ def fetch(query):
 
 if __name__ == "__main__":
     query = input("Enter your query: ")
-    print(fetch(query))
+    file_type = input("Enter file type (optional)")
+    results = search(query, file_type)
+    for result in results:
+        name, url = result.values()
+        print(f'{name:10} | {url:10}')
