@@ -1,7 +1,9 @@
-import math
-import requests
-import json
+from math import floor
+from requests import get as getRequest
+from json import loads as loadjson
 from bs4 import BeautifulSoup
+from urllib.parse import unquote as unquoteURI
+import re
 
 class _decoder:
     def __init__(self, inputKey):
@@ -44,7 +46,7 @@ class _decoder:
     def modulosAfterDivision (self, n):
         array = []
         for i in range(4):
-            array.append(math.floor(n / (256**i)) % 256)
+            array.append(floor(n / (256**i)) % 256)
         return array
     def xorUnsigned(self,x,y):
         result = int(x)^int(y)
@@ -78,7 +80,7 @@ class _decoder:
     def toHexadecimal (self, n):
         string, modulos = "", self.modulosAfterDivision(n)
         for i in range (3,-1, -1):
-            x = math.floor(modulos[i] / 16)
+            x = floor(modulos[i] / 16)
             y = modulos[i] % 16
             x += 48 if x < 10 else 55
             y += 48 if y < 10 else 55
@@ -112,20 +114,22 @@ class _decoder:
         y = self.xorUnsigned(y, self.numberSet1[0])
         self.first = y
         self.second = x
-def searchHTML(query, fileType=""):
+def searchHTML(query, fileType="", *, insecure=False):
     queryPayload = {"q": query}
     if fileType in ("documents", "videos", "images", "archives", "audios"):
         queryPayload["type"] = fileType
-    req = requests.get("https://uloz.to/hledej", params=queryPayload, headers={"X-Requested-With": "XMLHttpRequest"})
-    res = json.loads(req.json()["items"].split("pg.push(")[1].split(");\n</script>")[0])
+    req = getRequest("https://uloz.to/hledej", params=queryPayload, verify=not(insecure), headers={"X-Requested-With": "XMLHttpRequest"})
+    res = loadjson(req.json()["items"].split("pg.push(")[1].split(");\n</script>")[0])
     decoder = _decoder(res[1])
     result = []
     for key in res[0].keys():
-        result.append(decoder.decode(res[0][key]))
+        rawDecode = decoder.decode(res[0][key])
+        fixedDiacritics = unquoteURI(re.sub("\\\\x", "%", rawDecode.encode('ascii', 'backslashreplace').decode()))
+        result.append(fixedDiacritics)
     return result
 
-def search(query, fileType=""):
-    html = "".join(searchHTML(query, fileType))
+def search(query, fileType="", *, insecure=False):
+    html = "".join(searchHTML(query, fileType, insecure=insecure))
     soup = BeautifulSoup(html, "html.parser")
     results = []
     for result in soup.select(".js-result-item"):
@@ -133,10 +137,10 @@ def search(query, fileType=""):
         results.append({"name": filenameEl.text.strip(), "link": "https://uloz.to" + filenameEl["href"]})
     return results
 
-if __name__ == "__main__":
-    query = input("Enter your query: ")
-    file_type = input("Enter file type (optional)")
-    results = search(query, file_type)
-    for result in results:
-        name, url = result.values()
-        print(f'{name:10} | {url:10}')
+# if __name__ == "__main__":
+#     query = input("Enter your query: ")
+#     file_type = input("Enter file type (optional): ")
+#     results = search(query, file_type)
+#     for result in results:
+#         name, url = result.values()
+#         print(f'{name:10} | {url:10}')
