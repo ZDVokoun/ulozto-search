@@ -1,6 +1,13 @@
 # ulozto-search
 Search uloz.to for files using Python. It only supports one-page query for now. 
 
+## Install
+It's avaiable in [PyPI](https://pypi.org/project/ulozto-search/), so you can use `pip` to install it:
+
+``` sh
+python -m pip install ulozto-search
+```
+
 ## Usage
 
 ``` python
@@ -34,4 +41,10 @@ optional arguments:
                         Filter by file type
   --insecure            Don't verify SSL certificates, not recommended
 
+```
+
+So if you want to download all files found by ulozto-search, enter this to terminal (uses [ulozto-downloader](https://github.com/setnicka/ulozto-downloader)):
+
+``` sh
+ulozto-search "your query" | while read in; do ulozto-downloader --auto-captcha $(echo "$in" | cut -d '|' -f2); done
 ```
