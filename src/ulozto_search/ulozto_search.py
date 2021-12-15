@@ -136,11 +136,3 @@ def search(query, fileType="", *, insecure=False):
         filenameEl = result.find("a", class_="js-file-name")
         results.append({"name": filenameEl.text.strip(), "link": "https://uloz.to" + filenameEl["href"]})
     return results
-
-# if __name__ == "__main__":
-#     query = input("Enter your query: ")
-#     file_type = input("Enter file type (optional): ")
-#     results = search(query, file_type)
-#     for result in results:
-#         name, url = result.values()
-#         print(f'{name:10} | {url:10}')
