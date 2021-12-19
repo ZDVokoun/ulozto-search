@@ -8,11 +8,16 @@ def cmd():
                         type=str, choices=["documents", "videos", "images", "archives", "audios"])
     parser.add_argument("--insecure", help="Don't verify SSL certificates, not recommended",
                         action="store_true")
+    parser.add_argument("--show-approximate", help="Show approximate results", action="store_true")
     args = parser.parse_args()
-    results = search(args.query, args.type, insecure=args.insecure)
+    results = search(args.query, args.type, insecure=args.insecure, includeApproximate=args.show_approximate)
+    if len(results) == 0:
+        print("Haven't found any results")
+        return
     for result in results:
         name, url = result.values()
         print(f'{name:10} | {url:10}')
+    return
 
 if __name__ == "__main__":
     cmd()

@@ -15,22 +15,26 @@ import ulozto_search
 
 query = "your_query"
 file_type = "documents|videos|images|archives|audios"  # optional
-kwargs = {
-    "insecure": False   # disables SSL check, optional, default False
+kwargsSearch = {
+    "insecure": False           # disables SSL check, optional, default False
+    "includeApproximate": False  # also return approximate results
+}
+kwargsSearchHTML = {
+    "insecure": False           # same as previous one
 }
 
 # search and return dictionary
-ulozto_search.search(query, file_type, **kwargs)
+ulozto_search.search(query, file_type, **kwargsSearch)
 
 # search and return HTML string
-ulozto_search.searchHTML(query, file_type, **kwargs)
+ulozto_search.searchHTML(query, file_type, **kwargsSearchHTML)
 ```
 
 It can be also used from terminal:
 
 ```
 $ ulozto-search -h
-usage: ulozto-search [-h] [-t {documents,videos,images,archives,audios}] [--insecure] query
+usage: ulozto-search [-h] [-t {documents,videos,images,archives,audios}] [--insecure] [--show-approximate] query
 
 positional arguments:
   query                 String to query uloz.to
@@ -40,7 +44,7 @@ optional arguments:
   -t {documents,videos,images,archives,audios}, --type {documents,videos,images,archives,audios}
                         Filter by file type
   --insecure            Don't verify SSL certificates, not recommended
-
+  --show-approximate     Show approximate results
 ```
 
 So if you want to download all files found by ulozto-search, enter this to terminal (uses [ulozto-downloader](https://github.com/setnicka/ulozto-downloader)):
