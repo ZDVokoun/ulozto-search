@@ -132,7 +132,7 @@ def search(query, fileType="", *, insecure=False, includeApproximate=False):
     html = "".join(searchHTML(query, fileType, insecure=insecure))
     soup = BeautifulSoup(html, "html.parser")
     results = []
-    if soup.select('.flash.alert-info') == [] and not includeApproximate:
+    if len(soup.select('.flash.alert-info')) == 0 and not includeApproximate:
         return results
     for result in soup.select(".js-result-item"):
         filenameEl = result.find("a", class_="js-file-name")
