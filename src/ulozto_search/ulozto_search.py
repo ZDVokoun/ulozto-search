@@ -114,14 +114,16 @@ class _decoder:
         y = self.xorUnsigned(y, self.numberSet1[0])
         self.first = y
         self.second = x
-def searchHTML(query, fileType="", *, insecure=False):
+def searchHTML(query, fileType="", *, insecure=False, includeApproximate=False):
     queryPayload = {"q": query}
     if fileType in ("documents", "videos", "images", "archives", "audios"):
         queryPayload["type"] = fileType
     req = getRequest("https://uloz.to/hledej", params=queryPayload, verify=not(insecure), headers={"X-Requested-With": "XMLHttpRequest"})
+    result = []
+    if re.search('class=[\\\]"flash', req.text) != None:
+        return result
     res = loadjson(req.json()["items"].split("pg.push(")[1].split(");\n</script>")[0])
     decoder = _decoder(res[1])
-    result = []
     for key in res[0].keys():
         rawDecode = decoder.decode(res[0][key])
         fixedDiacritics = unquoteURI(re.sub("\\\\x", "%", rawDecode.encode('ascii', 'backslashreplace').decode()))
@@ -129,11 +131,9 @@ def searchHTML(query, fileType="", *, insecure=False):
     return result
 
 def search(query, fileType="", *, insecure=False, includeApproximate=False):
-    html = "".join(searchHTML(query, fileType, insecure=insecure))
+    html = "".join(searchHTML(query, fileType, insecure=insecure, includeApproximate=includeApproximate))
     soup = BeautifulSoup(html, "html.parser")
     results = []
-    if len(soup.select('.flash.alert-info')) == 0 and not includeApproximate:
-        return results
     for result in soup.select(".js-result-item"):
         filenameEl = result.find("a", class_="js-file-name")
         results.append({"name": filenameEl.text.strip(), "link": "https://uloz.to" + filenameEl["href"]})
