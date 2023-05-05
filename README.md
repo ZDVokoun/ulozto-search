@@ -1,5 +1,8 @@
-# ulozto-search
+# ulozto-search (DEPRECATED)
 Search uloz.to for files using Python. It only supports one-page query for now. 
+
+## WARNING
+Due to change of a search engine on uloz.to, this code stopped working. And because I don't have any motivation to fix the issue right now, I won't support this project anytime soon.
 
 ## Install
 It's avaiable in [PyPI](https://pypi.org/project/ulozto-search/), so you can use `pip` to install it:
